@@ -1,4 +1,9 @@
 ##################################################
+# Set Frequency
+##################################################
+$everyMinutes = 15
+
+##################################################
 # Set Functions
 ##################################################
 function Write-DattoUserDefinedField {
@@ -52,15 +57,21 @@ if (Test-Path -Path $programFileLocation) {
 }
 
 ##################################################
-# Run Program and upload to Datto RMM Udf
+# Create Cronjob
 ##################################################
 if (Test-Path -Path $scriptFileLocation) {
-    Write-Host "<-Scheduler Script is installed! continue ->"
+    Write-Host "<-Scheduler Script is installed! Create Cronjob ->"
     $action = New-ScheduledTaskAction -Execute $scriptFileLocation
-    $trigger = New-ScheduledTaskTrigger -RepetitionDuration 15 -Minutes
-    Register-ScheduledTask -TaskName "Speedtest" -Trigger $trigger -Action $action -RunLevel Highest –Force
+    $trigger = New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionDuration (New-TimeSpan -Minutes $everyMinutes) 
+    Register-ScheduledTask -TaskName "Speedtest"  -Trigger $trigger -Action $action -RunLevel Highest –Force
+    Write-Host "<- Cronjob Created ->"
+    
+    exit 0
+    
 } else {
     Write-Host "<-Scheduler Script is not installed! error ->"
+    
+    exit 1
 }
 
 
