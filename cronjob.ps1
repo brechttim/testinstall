@@ -40,7 +40,10 @@ if (Test-Path -Path $programLocation) {
 
 # test if file exists
 if (Test-Path -Path $programFileLocation) {
-    Write-Host "<-Program is installed!->"
+    Write-Host "<-Program is installed -> Reinstall/Update ->"
+    Invoke-WebRequest $downloadLink -OutFile $programFileLocationRaw
+    Expand-Archive $programFileLocationRaw -DestinationPath $programLocation -Force
+    Write-Host "<-Update Complete->"
 }   else{
     Write-Host "<-Exe doesn't exist -> Download and install->"
     Invoke-WebRequest $downloadLink -OutFile $programFileLocationRaw
@@ -55,7 +58,7 @@ if (Test-Path -Path $scriptFileLocation) {
     Write-Host "<-Scheduler Script is installed! continue ->"
     $action = New-ScheduledTaskAction -Execute $scriptFileLocation
     $trigger = New-ScheduledTaskTrigger -RepetitionDuration 15 -Minutes
-
+    Register-ScheduledTask -TaskName "Speedtest" -Trigger $trigger -Action $action -RunLevel Highest –Force
 } else {
     Write-Host "<-Scheduler Script is not installed! error ->"
 }
@@ -64,21 +67,3 @@ if (Test-Path -Path $scriptFileLocation) {
 
 
 
-
-
-##################################################
-# Run Program and upload to Datto RMM Udf
-##################################################
-write-host '<-Executing Test Program'
-$speedtest = &$programFileLocation
-
-write-host '<-Writing Testing Data into Custom Field->'
-Write-DattoUserDefinedField -KeyName "Custom20" -Value $speedtest
-if((Get-ItemProperty "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\CentraStage").PSObject.Properties.Name -contains "Custom20"){
-    write-host '<-Completed->'
-} else {
-    Write-Host '<-Completed with ERROR->'
-}
-
-
-exit 0
