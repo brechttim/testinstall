@@ -2,6 +2,6 @@
 # Delete Cronjob
 ##################################################
 
-Unregister-ScheduledTask -TaskName "Speedtest" -Confirm:$false
+Unregister-ScheduledJob -Name "Speedtest" -Confirm:$false
 
 exit 0

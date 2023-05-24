@@ -61,19 +61,20 @@ if (Test-Path -Path $programFileLocation) {
 # Create scheduled job
 ##################################################
 
-Get-ScheduledJob -Name "Speedtest" -ErrorAction SilentlyContinue -OutVariable taskExists
 
 if (Test-Path -Path $scriptFileLocation) {
-
+    
+    Get-ScheduledJob -Name "Speedtest" -ErrorAction SilentlyContinue -OutVariable taskExists 
     # delete Scheduled Job if existent
     if(!(!$taskExists)){
+        Write-Host "<- Overwriting Scheduled Job ->"
         Unregister-ScheduledJob -Name "Speedtest"
     }
     
     # (re)create Scheduled Job
     $trigger = New-JobTrigger -Once -At (Get-Date) -RepetitionInterval (New-TimeSpan -Minutes $everyMinutes) -RepetitionDuration ([timespan]::MaxValue)
     Register-ScheduledJob -Name "Speedtest"  -Trigger $trigger -FilePath $scriptFileLocation
-    Get-ScheduledJob -Name "Speedtest" -Verbose -Debug
+    # Get-ScheduledJob -Name "Speedtest" -Verbose -Debug
     Write-Host "<- scheduled job Created ->"
     
     exit 0
@@ -83,26 +84,3 @@ if (Test-Path -Path $scriptFileLocation) {
     
     exit 1
 }
-
-
-# if (Test-Path -Path $scriptFileLocation) {
-#     Write-Host "<-Scheduler Script is installed! Create scheduled job ->"
-#     $action = New-ScheduledTaskAction -Execute $scriptFileLocation
-#     $trigger = New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionInterval (New-TimeSpan -Minutes $everyMinutes) 
-#     Register-ScheduledTask -TaskName "Speedtest"  -Trigger $trigger -Action $action -RunLevel Highest –Force
-#     Start-ScheduledTask -TaskName "Speedtest"
-#     Write-Host "<- scheduled job Created ->"
-#     Get-ScheduledTaskInfo -TaskName "Speedtest"
-    
-#     exit 0
-    
-# } else {
-#     Write-Host "<-Scheduler Script is not installed! error ->"
-    
-#     exit 1
-# }
-
-
-
-
-
