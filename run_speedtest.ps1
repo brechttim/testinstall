@@ -1,9 +1,4 @@
 ##################################################
-# Set Frequency
-##################################################
-$everyMinutes = 15
-
-##################################################
 # Set Functions
 ##################################################
 function Write-DattoUserDefinedField {
@@ -26,13 +21,11 @@ function Write-DattoUserDefinedField {
 $downloadLink = "https://github.com/brechttim/testinstall/raw/master/speedtest.zip"
 $programName = "speedtest"
 $programFileName = $programName+".exe"
-$scriptFileName = "run.ps1"
 $programFileNameRaw = $programName+".zip"
 $programRoot = $Env:Programfiles+"\Pikoworks"
 $programLocation = $programRoot+"\"+$programName
 $programFileLocation = $programLocation +"\"+$programFileName
 $programFileLocationRaw = $programLocation +"\"+$programFileNameRaw
-$scriptFileLocation = $programLocation +"\"+$scriptFileName
 
 # test path
 if (Test-Path -Path $programLocation) {
@@ -45,10 +38,7 @@ if (Test-Path -Path $programLocation) {
 
 # test if file exists
 if (Test-Path -Path $programFileLocation) {
-    Write-Host "<-Program is installed -> Reinstall/Update ->"
-    Invoke-WebRequest $downloadLink -OutFile $programFileLocationRaw
-    Expand-Archive $programFileLocationRaw -DestinationPath $programLocation -Force
-    Write-Host "<-Update Complete->"
+    Write-Host "<-Program is installed!->"
 }   else{
     Write-Host "<-Exe doesn't exist -> Download and install->"
     Invoke-WebRequest $downloadLink -OutFile $programFileLocationRaw
@@ -57,24 +47,18 @@ if (Test-Path -Path $programFileLocation) {
 }
 
 ##################################################
-# Create Cronjob
+# Run Program and upload to Datto RMM Udf
 ##################################################
-if (Test-Path -Path $scriptFileLocation) {
-    Write-Host "<-Scheduler Script is installed! Create Cronjob ->"
-    $action = New-ScheduledTaskAction -Execute $scriptFileLocation
-    $trigger = New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionDuration (New-TimeSpan -Minutes $everyMinutes) 
-    Register-ScheduledTask -TaskName "Speedtest"  -Trigger $trigger -Action $action -RunLevel Highest –Force
-    Write-Host "<- Cronjob Created ->"
-    
-    exit 0
-    
+write-host '<-Executing Test Program'
+$speedtest = &$programFileLocation
+
+write-host '<-Writing Testing Data into Custom Field->'
+Write-DattoUserDefinedField -KeyName "Custom20" -Value $speedtest
+if((Get-ItemProperty "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\CentraStage").PSObject.Properties.Name -contains "Custom20"){
+    write-host '<-Completed->'
 } else {
-    Write-Host "<-Scheduler Script is not installed! error ->"
-    
-    exit 1
+    Write-Host '<-Completed with ERROR->'
 }
 
 
-
-
-
+exit 0
