@@ -29,21 +29,21 @@ $programFileLocationRaw = $programLocation +"\"+$programFileNameRaw
 
 # test path
 if (Test-Path -Path $programLocation) {
-    #Write-Host "<-Path exists!->"
+   Write-Host "<-Path exists!->"
 } else {
-    #Write-Host "<-Path doesn't exist -> Create->"
+   Write-Host "<-Path doesn't exist -> Create->"
     New-Item -Path $programRoot -Name $programName -ItemType "directory"
-    #Write-Host "<-Created->"
+   Write-Host "<-Created->"
 }
 
 # test if file exists
 if (Test-Path -Path $programFileLocation) {
-    #Write-Host "<-Program is installed!->"
+   Write-Host "<-Program is installed!->"
 }   else{
-    #Write-Host "<-Exe doesn't exist -> Download and install->"
+   Write-Host "<-Exe doesn't exist -> Download and install->"
     Invoke-WebRequest $downloadLink -OutFile $programFileLocationRaw
     Expand-Archive $programFileLocationRaw -DestinationPath $programLocation -Force
-    #Write-Host "<-Installed->"
+   Write-Host "<-Installed->"
 }
 
 ##################################################
@@ -56,9 +56,9 @@ $speedtest = &$programFileLocation
 Write-DattoUserDefinedField -KeyName "Custom20" -Value $speedtest
 if((Get-ItemProperty "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\CentraStage").PSObject.Properties.Name -contains "Custom20"){
     exit 0
-    #Write-host '<-Completed->'
+   Write-Host '<-Completed->'
 } else {
-    #Write-Host '<-Completed with ERROR->'
+   Write-Host '<-Completed with ERROR->'
     exit 1
 }
 
